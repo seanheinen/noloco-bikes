@@ -3,7 +3,10 @@ import { DublinBikesService } from '../services/dublin-bikes.service';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import mockDublinBikes from '../specs/data/dublin-bikes.json';
+import mockDublinBikesNormalised from '../specs/data/dublin-bikes-normalised.json';
+import mockDublinBikesNormalisedFilteredByBankingTrue from '../specs/data/dublin-bikes-normalised-filtered-by-banking-true.json';
 import expectedSchema from '../specs/data/schema.json';
+import { Operator } from '../models';
 
 describe('DublinBikesService', () => {
   let service: DublinBikesService;
@@ -41,11 +44,31 @@ describe('DublinBikesService', () => {
         },
       });
     });
-    // it('should return the data', () => {
-    //   expect(service.getData({})).toBe('Hello World!');
-    // });
-    // it('should return the data with filters', () => {
-    //   expect(service.getData({ where: { name: 'John' } })).toBeDefined();
-    // });
+  });
+
+  describe('getData', () => {
+    it('should return all of the data', () => {
+      jest.spyOn(httpService, 'get').mockImplementation(() => {
+        return httpResponse;
+      });
+
+      service.getData({ where: {} }).subscribe((data) => {
+        expect(data.length).toEqual(mockDublinBikesNormalised.length);
+      });
+    });
+
+    it('should return all of the data where banking is true', () => {
+      jest.spyOn(httpService, 'get').mockImplementation(() => {
+        return httpResponse;
+      });
+
+      service
+        .getData({ where: { banking: { operator: Operator.EQ, value: true } } })
+        .subscribe((data) => {
+          expect(data.length).toEqual(
+            mockDublinBikesNormalisedFilteredByBankingTrue.length,
+          );
+        });
+    });
   });
 });

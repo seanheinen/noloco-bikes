@@ -5,4 +5,5 @@ export enum DataType {
   DATE = 'DATE',
   BOOLEAN = 'BOOLEAN',
   OPTION = 'OPTION',
+  UNKNOWN = 'UNKNOWN',
 }

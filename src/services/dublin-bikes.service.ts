@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { environment } from '../environment';
 import { map, Observable } from 'rxjs';
-import { DataList, DataType, Query, Schema } from '../models';
+import { DataList, DataType, Operator, Query, Schema } from '../models';
 import _ from 'lodash';
 
 @Injectable()
@@ -18,11 +18,47 @@ export class DublinBikesService {
   }
 
   getData(query: Query): Observable<DataList> {
-    console.log(query);
+    return this.httpService.get(environment.dublinBikesUrl).pipe(
+      map((response) => this.normalizeData(response.data as DataList)),
+      map((items) => {
+        const filters = Object.entries(query.where);
+        if (filters.length === 0) return items;
 
-    return this.httpService
-      .get(environment.dublinBikesUrl)
-      .pipe(map((response) => this.normalizeData(response.data as DataList)));
+        const validFilters = filters.map(([field, evaluation]) => {
+          // Ensure value is valid type
+          if (this.getDataType(evaluation.value).type === DataType.UNKNOWN) {
+            throw new Error(
+              `Invalid data type for filter value: ${evaluation.value} for field: ${field}`,
+            );
+          }
+          return {
+            field,
+            evaluation,
+          };
+        });
+
+        return items.filter((item) => {
+          return validFilters.every(({ field, evaluation }) => {
+            return this.evaluate(
+              evaluation.operator,
+              evaluation.value,
+              item[field],
+            );
+          });
+        });
+      }),
+    );
+  }
+
+  private evaluate(operation: Operator, incoming: any, existing: any): boolean {
+    switch (operation) {
+      case Operator.EQ:
+        return incoming === existing;
+      case Operator.LT:
+        return incoming < existing;
+      case Operator.GT:
+        return incoming > existing;
+    }
   }
 
   private normalizeData(data: unknown): DataList {
@@ -41,10 +77,26 @@ export class DublinBikesService {
         Object.entries(item).reduce(
           (acc, [key, value]) => {
             const normalizedKey = _.camelCase(key);
-            return {
-              ...acc,
-              [normalizedKey]: value as unknown,
-            };
+            const valueType = this.getDataType(value).type;
+            switch (valueType) {
+              case DataType.DATE:
+                return {
+                  ...acc,
+                  [normalizedKey]:
+                    value === null ? null : new Date(value as string),
+                };
+              case DataType.BOOLEAN:
+                return {
+                  ...acc,
+                  [normalizedKey]:
+                    value === null
+                      ? null
+                      : (value as string | boolean).toString().toLowerCase() ===
+                        'true',
+                };
+              default:
+                return { ...acc, [normalizedKey]: value as unknown };
+            }
           },
           {} as Record<string, unknown>,
         ),
@@ -76,6 +128,9 @@ export class DublinBikesService {
       const display = key;
       const name = _.camelCase(key);
       const { type, options } = this.getDataType(values);
+      if (type === DataType.UNKNOWN) {
+        throw new Error(`Unknown data type for key: ${key}`);
+      }
 
       schema.push({
         display,
@@ -88,10 +143,18 @@ export class DublinBikesService {
     return schema;
   }
 
+  private getDataType(values: unknown): {
+    type: DataType;
+    options: string[];
+  };
   private getDataType(values: unknown[]): {
     type: DataType;
     options: string[];
   } {
+    if (!Array.isArray(values)) {
+      values = [values];
+    }
+
     const valuesExcludingNulls = values.filter((value) => value !== null);
 
     // DATE
@@ -141,6 +204,6 @@ export class DublinBikesService {
     }
 
     // DEFAULT
-    return { type: DataType.TEXT, options: [] };
+    return { type: DataType.UNKNOWN, options: [] };
   }
 }
