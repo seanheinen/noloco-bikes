@@ -74,7 +74,7 @@ Represents the kind of value a field holds. Can be one of:
 
 ---
 
-### 🧾 Example
+For example, this row might have the following schema:
 
 #### Row
 ```json
@@ -166,6 +166,7 @@ The following request body should return all records where
     "discountPercentage": { "gt": 6 }
   }
 }
+```
 
 ## 🗒️ Note
 
