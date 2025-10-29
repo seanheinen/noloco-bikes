@@ -6,9 +6,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('Dublink bike stations API')
+    .setTitle('Dublin bike stations API')
     .setVersion('1.0.0')
-    .addTag('Dublin bike stations')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
