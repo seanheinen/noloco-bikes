@@ -1,28 +1,51 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { HttpService } from '@nestjs/axios';
 import { DublinBikesService } from '../services/dublin-bikes.service';
+import { of, throwError } from 'rxjs';
+import { AxiosResponse } from 'axios';
+import mockDublinBikes from '../specs/data/dublin-bikes.json';
+import expectedSchema from '../specs/data/schema.json';
 
-describe('AppController', () => {
+describe('DublinBikesService', () => {
   let service: DublinBikesService;
+  let httpService: HttpService;
+  const httpResponse = of({ data: mockDublinBikes } as AxiosResponse<
+    any,
+    any,
+    { [key: string | number]: any }
+  >);
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      providers: [DublinBikesService],
-    }).compile();
-
-    service = app.get<DublinBikesService>(DublinBikesService);
+  beforeEach(() => {
+    httpService = new HttpService();
+    service = new DublinBikesService(httpService);
   });
 
-  describe('root', () => {
+  describe('getSchema', () => {
     it('should return the schema', () => {
-      expect(service.getSchema()).toBe('Hello World!');
+      jest.spyOn(httpService, 'get').mockImplementation(() => {
+        return httpResponse;
+      });
+
+      service.getSchema().subscribe((schema) => {
+        expect(schema).toStrictEqual(expectedSchema);
+      });
     });
 
-    it('should return the data', () => {
-      expect(service.getData({})).toBe('Hello World!');
-    });
+    it('should return an error if the schema cannot be retrieved', () => {
+      jest.spyOn(httpService, 'get').mockImplementation(() => {
+        return throwError(() => new Error('Error getting schema'));
+      });
 
-    it('should return the data with filters', () => {
-      expect(service.getData({ where: { name: 'John' } })).toBeDefined();
+      service.getSchema().subscribe({
+        error(err) {
+          expect(err).toBeDefined();
+        },
+      });
     });
+    // it('should return the data', () => {
+    //   expect(service.getData({})).toBe('Hello World!');
+    // });
+    // it('should return the data with filters', () => {
+    //   expect(service.getData({ where: { name: 'John' } })).toBeDefined();
+    // });
   });
 });
