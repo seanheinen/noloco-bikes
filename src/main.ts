@@ -8,9 +8,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Dublink bike stations API')
     .setVersion('1.0.0')
-    .addTag('Dubit')
-    .addTag('Bike')
-    .addTag('Stations')
+    .addTag('Dublin bike stations')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
