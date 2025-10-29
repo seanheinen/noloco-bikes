@@ -14,11 +14,11 @@ export class BikesStationsController {
 
   @Post('data')
   getData(@Body() body?: models.Query): Observable<models.Bike[]> {
-    return this.dublinBikesService.getBikes(body ?? { where: {} });
+    return this.dublinBikesService.getBikeStations(body ?? { where: {} });
   }
 
   @Get('data/:id')
   getDataItem(@Param('id') id: string): Observable<models.Bike> {
-    return this.dublinBikesService.getBike(id);
+    return this.dublinBikesService.getBikeStation(Number(id));
   }
 }

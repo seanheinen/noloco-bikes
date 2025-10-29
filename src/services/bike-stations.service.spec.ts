@@ -46,13 +46,13 @@ describe('BikesService', () => {
     });
   });
 
-  describe('getBikes', () => {
+  describe('getBikeStations', () => {
     it('should return all of the data', () => {
       jest.spyOn(httpService, 'get').mockImplementation(() => {
         return httpResponse;
       });
 
-      service.getBikes({ where: {} }).subscribe((data) => {
+      service.getBikeStations({ where: {} }).subscribe((data) => {
         expect(data.length).toEqual(mockDublinBikeStationsNormalised.length);
       });
     });
@@ -63,7 +63,7 @@ describe('BikesService', () => {
       });
 
       service
-        .getBikes({
+        .getBikeStations({
           where: { banking: { operator: Operator.EQ, value: true } },
         })
         .subscribe((data) => {

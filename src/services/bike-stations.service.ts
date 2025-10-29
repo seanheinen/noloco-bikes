@@ -17,7 +17,7 @@ export class BikeStationService {
     );
   }
 
-  getBikes(query: Query): Observable<Bike[]> {
+  getBikeStations(query: Query): Observable<Bike[]> {
     return this.httpService.get(environment.dublinBikesUrl).pipe(
       map((response) => this.normalizeData(response.data)),
       map((items) => {
@@ -50,8 +50,8 @@ export class BikeStationService {
     );
   }
 
-  getBike(id: string): Observable<Bike> {
-    return this.getBikes({
+  getBikeStation(id: number): Observable<Bike> {
+    return this.getBikeStations({
       where: { id: { operator: Operator.EQ, value: id } },
     }).pipe(
       map((bikes) => {

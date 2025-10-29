@@ -42,7 +42,7 @@ describe('BikeStationsController', () => {
   describe('getBikes', () => {
     it('should return the data', () => {
       jest
-        .spyOn(service, 'getBikes')
+        .spyOn(service, 'getBikeStations')
         .mockImplementation(() => of(dublinBikeStationsNormalised));
       controller.getData({ where: {} }).subscribe((data) => {
         expect(data).toBeDefined();
@@ -51,7 +51,7 @@ describe('BikeStationsController', () => {
 
     it('should return the data without filters', () => {
       jest
-        .spyOn(service, 'getBikes')
+        .spyOn(service, 'getBikeStations')
         .mockImplementation(() => of(dublinBikeStationsNormalised));
       controller.getData().subscribe((data) => {
         expect(data).toBeDefined();
@@ -60,7 +60,7 @@ describe('BikeStationsController', () => {
 
     it('should return the data with filters', () => {
       jest
-        .spyOn(service, 'getBikes')
+        .spyOn(service, 'getBikeStations')
         .mockImplementation(() =>
           of(dublinBikeStationsNormalisedFilteredByBankingTrue),
         );
@@ -73,7 +73,7 @@ describe('BikeStationsController', () => {
 
     it('should return an error if the data cannot be retrieved', () => {
       jest
-        .spyOn(service, 'getBikes')
+        .spyOn(service, 'getBikeStations')
         .mockImplementation(() =>
           throwError(() => new Error('Error getting data')),
         );
