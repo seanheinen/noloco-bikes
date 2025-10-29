@@ -44,9 +44,16 @@ $ pnpm test:e2e
 $ pnpm test:cov
 ```
 
+## Deployment
+```bash
+heroku container:login
+heroku container:push web -a noloco-bikes
+heroku container:release web -a noloco-bikes
+```
+
 ## API Definition
 
-- Swagger - [Swagger](http://localhost:3000/api)
+- Swagger - [Swagger](https://noloco-bikes-6f6f42edcf4a.herokuapp.com/api)
 
 ## Stay in touch
 
