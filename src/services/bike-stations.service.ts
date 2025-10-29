@@ -2,11 +2,11 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { environment } from '../environment';
 import { map, Observable } from 'rxjs';
-import { DataList, DataType, Operator, Query, Schema } from '../models';
+import { Bike, DataType, Operator, Query, Schema } from '../models';
 import _ from 'lodash';
 
 @Injectable()
-export class DublinBikesService {
+export class BikeStationService {
   constructor(private readonly httpService: HttpService) {}
 
   getSchema(): Observable<Schema[]> {
@@ -17,9 +17,9 @@ export class DublinBikesService {
     );
   }
 
-  getData(query: Query): Observable<DataList> {
+  getBikes(query: Query): Observable<Bike[]> {
     return this.httpService.get(environment.dublinBikesUrl).pipe(
-      map((response) => this.normalizeData(response.data as DataList)),
+      map((response) => this.normalizeData(response.data)),
       map((items) => {
         const filters = Object.entries(query.where);
         if (filters.length === 0) return items;
@@ -50,6 +50,22 @@ export class DublinBikesService {
     );
   }
 
+  getBike(id: string): Observable<Bike> {
+    return this.getBikes({
+      where: { id: { operator: Operator.EQ, value: id } },
+    }).pipe(
+      map((bikes) => {
+        if (bikes.length === 0) {
+          throw new Error(`Bike not found with id: ${id}`);
+        }
+        if (bikes.length > 1) {
+          throw new Error(`Multiple bikes found with id: ${id}`);
+        }
+        return bikes[0];
+      }),
+    );
+  }
+
   private evaluate(operation: Operator, incoming: any, existing: any): boolean {
     switch (operation) {
       case Operator.EQ:
@@ -61,7 +77,7 @@ export class DublinBikesService {
     }
   }
 
-  private normalizeData(data: unknown): DataList {
+  private normalizeData(data: unknown): Bike[] {
     if (!Array.isArray(data)) {
       throw new Error('Response data is not a list of objects');
     }

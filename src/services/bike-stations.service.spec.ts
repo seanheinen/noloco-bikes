@@ -1,17 +1,17 @@
 import { HttpService } from '@nestjs/axios';
-import { DublinBikesService } from '../services/dublin-bikes.service';
+import { BikeStationService as BikeStationService } from './bike-stations.service';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import mockDublinBikes from '../specs/data/dublin-bikes.json';
-import mockDublinBikesNormalised from '../specs/data/dublin-bikes-normalised.json';
-import mockDublinBikesNormalisedFilteredByBankingTrue from '../specs/data/dublin-bikes-normalised-filtered-by-banking-true.json';
+import mockDublinBikeStations from '../specs/data/dublin-bike-stations.json';
+import mockDublinBikeStationsNormalised from '../specs/data/dublin-bike-stations-normalised.json';
+import mockDublinBikeStationsNormalisedFilteredByBankingTrue from '../specs/data/dublin-bike-stations-normalised-filtered-by-banking-true.json';
 import expectedSchema from '../specs/data/schema.json';
 import { Operator } from '../models';
 
-describe('DublinBikesService', () => {
-  let service: DublinBikesService;
+describe('BikesService', () => {
+  let service: BikeStationService;
   let httpService: HttpService;
-  const httpResponse = of({ data: mockDublinBikes } as AxiosResponse<
+  const httpResponse = of({ data: mockDublinBikeStations } as AxiosResponse<
     any,
     any,
     { [key: string | number]: any }
@@ -19,7 +19,7 @@ describe('DublinBikesService', () => {
 
   beforeEach(() => {
     httpService = new HttpService();
-    service = new DublinBikesService(httpService);
+    service = new BikeStationService(httpService);
   });
 
   describe('getSchema', () => {
@@ -46,14 +46,14 @@ describe('DublinBikesService', () => {
     });
   });
 
-  describe('getData', () => {
+  describe('getBikes', () => {
     it('should return all of the data', () => {
       jest.spyOn(httpService, 'get').mockImplementation(() => {
         return httpResponse;
       });
 
-      service.getData({ where: {} }).subscribe((data) => {
-        expect(data.length).toEqual(mockDublinBikesNormalised.length);
+      service.getBikes({ where: {} }).subscribe((data) => {
+        expect(data.length).toEqual(mockDublinBikeStationsNormalised.length);
       });
     });
 
@@ -63,10 +63,12 @@ describe('DublinBikesService', () => {
       });
 
       service
-        .getData({ where: { banking: { operator: Operator.EQ, value: true } } })
+        .getBikes({
+          where: { banking: { operator: Operator.EQ, value: true } },
+        })
         .subscribe((data) => {
           expect(data.length).toEqual(
-            mockDublinBikesNormalisedFilteredByBankingTrue.length,
+            mockDublinBikeStationsNormalisedFilteredByBankingTrue.length,
           );
         });
     });
